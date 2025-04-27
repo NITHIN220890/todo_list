@@ -19,7 +19,7 @@ app = FastAPI(title="Task Management API")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Your React frontend URL
+    allow_origins=["https://taskmaster-app-frontend.herokuapp.com","http://localhost:3000"],  # Your React frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
