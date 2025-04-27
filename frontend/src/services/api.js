@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://taskmaster-api.herokuapp.com/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://taskmaster-api-990d28ee08e0.herokuapp.com/api',
   headers: {
     'Content-Type': 'application/json'
   }
