@@ -1,0 +1,14 @@
+{
+  "name": "taskmaster",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": "16.x",
+    "npm": "8.x"
+  },
+  "scripts": {
+    "heroku-prebuild": "cd $PROJECT_PATH && npm install",
+    "heroku-postbuild": "cd $PROJECT_PATH && npm run build",
+    "start": "cd $PROJECT_PATH && npm start"
+  }
+}
