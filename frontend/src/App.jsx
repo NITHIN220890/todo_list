@@ -35,6 +35,9 @@ import './theme/dark-theme.css';
 import './theme/animations.css';
 import './theme/taskmaster-styles.css';
 import './theme/theme-header.css';
+import './theme/comments-styles.css';
+import './theme/calender-styles.css';
+
 
 const { Header, Sider, Content } = Layout;
 

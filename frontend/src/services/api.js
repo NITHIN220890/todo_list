@@ -1,4 +1,4 @@
-// Updated services/api.js
+// Updated services/api.js with comment functions
 import axios from 'axios';
 
 // Create axios instance with base URL
@@ -118,6 +118,10 @@ export const isAdmin = () => {
   return user.is_admin === true;
 };
 
+export const getCurrentUser = () => {
+  return JSON.parse(localStorage.getItem('user') || '{}');
+};
+
 // Tasks
 export const getTasks = async (params = {}) => {
   const response = await api.get('/tasks', { params });
@@ -133,8 +137,6 @@ export const createTask = async (taskData) => {
   const response = await api.post('/tasks', taskData);
   return response.data;
 };
-
-
 
 export const updateTaskStatus = async (id, status) => {
   const response = await api.patch(`/tasks/${id}/status`, { status });
@@ -165,6 +167,52 @@ export const deleteTask = async (id) => {
       return { success: true, message: "Task already deleted" };
     }
     console.error(`Error deleting task ${id}:`, error);
+    throw error;
+  }
+};
+
+// Comments
+export const getTaskComments = async (taskId) => {
+  try {
+    const response = await api.get(`/tasks/${taskId}/comments`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching comments for task ${taskId}:`, error);
+    throw error;
+  }
+};
+
+export const createComment = async (taskId, content) => {
+  try {
+    const response = await api.post(`/tasks/${taskId}/comments`, {
+      task_id: taskId,
+      content: content
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error creating comment for task ${taskId}:`, error);
+    throw error;
+  }
+};
+
+export const updateComment = async (commentId, content) => {
+  try {
+    const response = await api.put(`/comments/${commentId}`, {
+      content: content
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating comment ${commentId}:`, error);
+    throw error;
+  }
+};
+
+export const deleteComment = async (commentId) => {
+  try {
+    const response = await api.delete(`/comments/${commentId}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting comment ${commentId}:`, error);
     throw error;
   }
 };

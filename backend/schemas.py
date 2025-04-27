@@ -38,6 +38,31 @@ class User(UserBase):
         orm_mode = True
 
 
+# Comment schemas
+class CommentBase(BaseModel):
+    content: str
+
+
+class CommentCreate(CommentBase):
+    task_id: int
+
+
+class CommentUpdate(CommentBase):
+    pass
+
+
+class Comment(CommentBase):
+    id: int
+    task_id: int
+    user_id: int
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    user: User
+
+    class Config:
+        orm_mode = True
+
+
 # Task schemas
 class TaskBase(BaseModel):
     title: str
@@ -73,6 +98,7 @@ class Task(TaskBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     assignee: User
+    comments: List[Comment] = []
 
     class Config:
         orm_mode = True

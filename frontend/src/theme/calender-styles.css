@@ -1,0 +1,202 @@
+/* Additional Calendar and Comment Section Styles */
+
+/* Calendar Task Items */
+.calendar-task-item {
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar-task-item:hover {
+  transform: translateY(-1px);
+  background: rgba(30, 30, 30, 0.9);
+  border-color: rgba(147, 51, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-task-item .ant-badge-status-dot {
+  width: 8px;
+  height: 8px;
+}
+
+.calendar-task-item .ant-badge-status-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+/* Calendar cell styling */
+.ant-picker-calendar-date {
+  transition: all 0.2s ease;
+}
+
+.ant-picker-calendar-date:hover {
+  background: rgba(20, 20, 20, 0.3) !important;
+}
+
+.ant-picker-calendar .ant-picker-cell {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ant-picker-calendar .ant-picker-cell-in-view {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.ant-picker-calendar .ant-picker-cell-today .ant-picker-calendar-date {
+  border-color: #9333EA !important;
+}
+
+.ant-picker-calendar .ant-picker-cell-selected .ant-picker-calendar-date {
+  background: rgba(147, 51, 234, 0.2) !important;
+}
+
+/* Improved comment section */
+.comment-section {
+  margin-top: 12px;
+  padding-top: 16px;
+}
+
+.ant-comment {
+  position: relative;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+
+.ant-comment::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  top: 40px;
+  bottom: -8px;
+  width: 1px;
+  background: linear-gradient(to bottom, rgba(147, 51, 234, 0.3), transparent);
+  z-index: 0;
+}
+
+.ant-comment:last-child::after {
+  display: none;
+}
+
+.ant-comment-nested {
+  margin-left: 24px;
+  margin-top: 16px;
+}
+
+.ant-comment-avatar {
+  position: relative;
+  z-index: 1;
+}
+
+.ant-comment-content-author-name {
+  font-weight: 600;
+}
+
+.comment-time-ago {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.comment-edited-tag {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-left: 8px;
+}
+
+/* Comment text area */
+.comment-textarea {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: all 0.3s;
+}
+
+.comment-textarea:focus,
+.comment-textarea:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(147, 51, 234, 0.5);
+}
+
+.comment-submit-button {
+  margin-top: 12px;
+}
+
+/* Empty comments state */
+.comments-empty-state {
+  text-align: center;
+  padding: 32px 0;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+.comments-empty-icon {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.2);
+  margin-bottom: 12px;
+}
+
+/* Task detail modal */
+.task-detail-modal .ant-modal-content {
+  background: #141414;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.task-detail-modal .ant-modal-header {
+  background: rgba(20, 20, 20, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.task-detail-modal .ant-modal-title {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.task-detail-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.task-detail-modal .ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.task-detail-modal .ant-tabs-tab {
+  transition: all 0.3s;
+  padding: 8px 16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.task-detail-modal .ant-tabs-tab-active {
+  background: linear-gradient(120deg, #9333EA 0%, #4F46E5 100%);
+}
+
+.task-detail-modal .ant-tabs-ink-bar {
+  background: transparent;
+}
+
+/* Add subtle pulse animation to the comment notification badges */
+@keyframes subtle-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.comment-badge {
+  animation: subtle-pulse 2s infinite;
+}

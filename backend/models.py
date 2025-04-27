@@ -32,6 +32,7 @@ class User(Base):
     # Relationships
     created_tasks = relationship("Task", foreign_keys="Task.creator_id", back_populates="creator")
     assigned_tasks = relationship("Task", foreign_keys="Task.assignee_id", back_populates="assignee")
+    comments = relationship("Comment", back_populates="user")
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -51,3 +52,18 @@ class Task(Base):
     # Relationships
     creator = relationship("User", foreign_keys=[creator_id], back_populates="created_tasks")
     assignee = relationship("User", foreign_keys=[assignee_id], back_populates="assigned_tasks")
+    comments = relationship("Comment", back_populates="task", cascade="all, delete-orphan")
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text, nullable=False)
+    task_id = Column(Integer, ForeignKey("tasks.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    task = relationship("Task", back_populates="comments")
+    user = relationship("User", back_populates="comments")

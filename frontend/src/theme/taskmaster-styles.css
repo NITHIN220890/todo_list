@@ -791,3 +791,178 @@ h1, h2, h3, h4, h5 {
     padding: 2px 6px;
   }
 }
+
+/* Comment Section Styles - Add to taskmaster-styles.css */
+
+/* Comment Section */
+.comment-section {
+  margin-top: 16px;
+}
+
+.ant-comment {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.3s;
+}
+
+.ant-comment:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.ant-comment-inner {
+  padding: 0;
+}
+
+.ant-comment-content-author {
+  margin-bottom: 8px;
+}
+
+.ant-comment-content-author-name {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.ant-comment-content-author-time {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.ant-comment-content-detail p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.ant-comment-actions {
+  margin-top: 12px;
+}
+
+.ant-comment-actions > li {
+  padding-right: 8px;
+}
+
+/* Comment Form */
+.comment-form {
+  margin-bottom: 24px;
+}
+
+.comment-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.comment-form .ant-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comment-form .ant-input:focus {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: #4F46E5;
+}
+
+.comment-form-controls {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Comment List Header */
+.ant-list-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 0 16px 0;
+  margin-bottom: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Task Detail Modal */
+.task-detail-content {
+  padding: 0;
+}
+
+.task-detail-meta {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.task-detail-meta-item {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.task-detail-meta-item-label {
+  width: 100px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.task-detail-meta-item-value {
+  flex: 1;
+}
+
+/* Tabs styling */
+.ant-tabs-card > .ant-tabs-nav .ant-tabs-tab {
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+}
+
+.ant-tabs-card > .ant-tabs-nav .ant-tabs-tab-active {
+  background: #4F46E5;
+}
+
+.ant-tabs-tab-btn {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: white !important;
+}
+
+.ant-tabs-content {
+  padding-top: 16px;
+}
+
+/* Empty state styling */
+.comment-empty-state {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.comment-empty-state-icon {
+  font-size: 32px;
+  color: rgba(255, 255, 255, 0.2);
+  margin-bottom: 16px;
+}
+
+/* Avatar colors */
+.comment-avatar-admin {
+  background: linear-gradient(120deg, #9333EA 0%, #4F46E5 100%) !important;
+}
+
+.comment-avatar-user {
+  background: linear-gradient(120deg, #3B82F6 0%, #2563EB 100%) !important;
+}
+
+/* Badge for comment count */
+.comment-count-badge {
+  background: #4F46E5;
+  font-weight: 600;
+}
+
+/* Mobile responsive styling */
+@media (max-width: 576px) {
+  .ant-comment-content-author {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ant-comment-content-author-time {
+    margin-left: 0;
+    margin-top: 4px;
+  }
+
+  .ant-comment-actions {
+    margin-top: 8px;
+  }
+}

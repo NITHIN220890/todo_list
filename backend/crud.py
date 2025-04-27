@@ -1,4 +1,4 @@
-# crud.py
+# crud.py - Updated with comment operations
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 import models, schemas
@@ -227,4 +227,73 @@ def delete_task(db: Session, task_id: int):
     except Exception as e:
         db.rollback()
         print(f"Error deleting task: {e}")
+        raise
+
+
+# Comment CRUD operations
+def get_comments_by_task(db: Session, task_id: int, skip: int = 0, limit: int = 100):
+    return db.query(models.Comment).filter(
+        models.Comment.task_id == task_id
+    ).order_by(models.Comment.created_at.desc()).offset(skip).limit(limit).all()
+
+
+def create_comment(db: Session, comment: schemas.CommentCreate, user_id: int):
+    try:
+        db_comment = models.Comment(
+            content=comment.content,
+            task_id=comment.task_id,
+            user_id=user_id
+        )
+        db.add(db_comment)
+        db.commit()
+        db.refresh(db_comment)
+        return db_comment
+    except Exception as e:
+        db.rollback()
+        print(f"Error creating comment: {e}")
+        raise
+
+
+def update_comment(db: Session, comment_id: int, comment: schemas.CommentUpdate, user_id: int):
+    try:
+        db_comment = db.query(models.Comment).filter(
+            models.Comment.id == comment_id,
+            models.Comment.user_id == user_id
+        ).first()
+
+        if not db_comment:
+            return None
+
+        db_comment.content = comment.content
+        db_comment.updated_at = datetime.now()
+
+        db.commit()
+        db.refresh(db_comment)
+        return db_comment
+    except Exception as e:
+        db.rollback()
+        print(f"Error updating comment: {e}")
+        raise
+
+
+def delete_comment(db: Session, comment_id: int, user_id: int, is_admin: bool = False):
+    try:
+        # Allow admins to delete any comment, but users can only delete their own
+        if is_admin:
+            db_comment = db.query(models.Comment).filter(models.Comment.id == comment_id).first()
+        else:
+            db_comment = db.query(models.Comment).filter(
+                models.Comment.id == comment_id,
+                models.Comment.user_id == user_id
+            ).first()
+
+        if not db_comment:
+            return None
+
+        db.delete(db_comment)
+        db.commit()
+        return db_comment
+    except Exception as e:
+        db.rollback()
+        print(f"Error deleting comment: {e}")
         raise

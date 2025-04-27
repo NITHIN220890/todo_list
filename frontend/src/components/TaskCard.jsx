@@ -1,15 +1,17 @@
-// Fixed TaskCard.jsx with working edit and delete functionality
-import React from 'react';
-import { Card, Tag, Space, Button, Tooltip, Typography, Avatar, Popconfirm } from 'antd';
+// Updated TaskCard.jsx with Task Detail Modal integration
+import React, { useState } from 'react';
+import { Card, Tag, Space, Button, Tooltip, Typography, Avatar, Popconfirm, Badge } from 'antd';
 import {
   CheckCircleOutlined,
   EditOutlined,
   DeleteOutlined,
   InfoCircleOutlined,
   CalendarOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  CommentOutlined
 } from '@ant-design/icons';
 import moment from 'moment';
+import TaskDetailModal from './TaskDetailModal';
 
 const { Text, Paragraph } = Typography;
 
@@ -18,8 +20,11 @@ const TaskCard = ({
   onStatusUpdate,
   onEdit,
   onDelete,
+  onTaskUpdated,
   userIsAdmin = false
 }) => {
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+
   if (!task) return null;
 
   // Get priority styling
@@ -54,171 +59,214 @@ const TaskCard = ({
     return name.charAt(0).toUpperCase();
   };
 
+  // Show task detail modal
+  const showTaskDetail = () => {
+    setDetailModalVisible(true);
+  };
+
+  // Count comments
+  const commentCount = task.comments ? task.comments.length : 0;
+
   return (
-    <Card
-      className="task-card"
-      style={{
-        borderRadius: '12px',
-        background: '#1e1e1e',
-        overflow: 'hidden',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-      bodyStyle={{
-        padding: '16px',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-      bordered={false}
-    >
-      {/* Header section with title and priority */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: '12px'
-      }}>
-        <Text strong style={{ fontSize: '18px', flex: 1 }}>
-          {task.title}
-        </Text>
-        <Tag
-          className={getPriorityClass(task.priority)}
-          style={{
-            marginLeft: '8px',
-            textTransform: 'capitalize',
-            fontWeight: 500
-          }}
-        >
-          {task.priority}
-        </Tag>
-      </div>
-
-      {/* Description section (if present) */}
-      {task.description && (
-        <Paragraph
-          type="secondary"
-          style={{
-            fontSize: '14px',
-            marginBottom: '16px'
-          }}
-          ellipsis={{ rows: 2 }}
-        >
-          {task.description}
-        </Paragraph>
-      )}
-
-      {/* Meta information section */}
-      <div style={{ marginBottom: 'auto' }}>
-        {/* Assignee information */}
-        <div style={{ marginBottom: '12px' }}>
-          <Text type="secondary" style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>
-            Assigned to:
+    <>
+      <Card
+        className="task-card"
+        style={{
+          borderRadius: '12px',
+          background: '#1e1e1e',
+          overflow: 'hidden',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+        bodyStyle={{
+          padding: '16px',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+        bordered={false}
+      >
+        {/* Header section with title and priority */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: '12px'
+        }}>
+          <Text strong style={{ fontSize: '18px', flex: 1 }}>
+            {task.title}
           </Text>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar
-              style={{
-                marginRight: '8px',
-                background: task.assignee?.name === 'Administrator' ? '#9333EA' : '#3B82F6'
-              }}
-            >
-              {getInitials(task.assignee?.name)}
-            </Avatar>
-            <Text>{task.assignee?.name || 'Unassigned'}</Text>
-          </div>
-        </div>
-
-        {/* Timeline information */}
-        <div style={{ marginBottom: '12px' }}>
-          <Text type="secondary" style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>
-            Timeline:
-          </Text>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <CalendarOutlined style={{ marginRight: '8px', color: '#3B82F6' }} />
-            <Text>{formattedDate()}</Text>
-          </div>
-        </div>
-
-        {/* Status badge */}
-        <div style={{ marginBottom: '16px' }}>
-          <div
-            className={getStatusClass(task.status)}
+          <Tag
+            className={getPriorityClass(task.priority)}
             style={{
-              padding: '6px 12px',
-              background: 'rgba(0,0,0,0.2)',
-              borderRadius: '6px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
+              marginLeft: '8px',
+              textTransform: 'capitalize',
+              fontWeight: 500
             }}
           >
-            <ClockCircleOutlined />
-            <Text style={{ textTransform: 'capitalize' }}>
-              {task.status.replace('_', ' ')}
-            </Text>
-          </div>
+            {task.priority}
+          </Tag>
         </div>
-      </div>
 
-      {/* Actions footer */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        borderTop: '1px solid rgba(255,255,255,0.1)',
-        paddingTop: '12px',
-        gap: '8px',
-        marginTop: '16px'
-      }}>
-        <Tooltip title="View Details">
-          <Button
-            type="text"
-            icon={<InfoCircleOutlined />}
-            shape="circle"
-            onClick={() => onEdit && onEdit(task)}
-          />
-        </Tooltip>
+        {/* Description section (if present) */}
+        {task.description && (
+          <Paragraph
+            type="secondary"
+            style={{
+              fontSize: '14px',
+              marginBottom: '16px'
+            }}
+            ellipsis={{ rows: 2 }}
+          >
+            {task.description}
+          </Paragraph>
+        )}
 
-        {task.status !== 'completed' && (
-          <Tooltip title="Mark Complete">
+        {/* Meta information section */}
+        <div style={{ marginBottom: 'auto' }}>
+          {/* Assignee information */}
+          <div style={{ marginBottom: '12px' }}>
+            <Text type="secondary" style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>
+              Assigned to:
+            </Text>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Avatar
+                style={{
+                  marginRight: '8px',
+                  background: task.assignee?.name === 'Administrator' ? '#9333EA' : '#3B82F6'
+                }}
+              >
+                {getInitials(task.assignee?.name)}
+              </Avatar>
+              <Text>{task.assignee?.name || 'Unassigned'}</Text>
+            </div>
+          </div>
+
+          {/* Timeline information */}
+          <div style={{ marginBottom: '12px' }}>
+            <Text type="secondary" style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>
+              Timeline:
+            </Text>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <CalendarOutlined style={{ marginRight: '8px', color: '#3B82F6' }} />
+              <Text>{formattedDate()}</Text>
+            </div>
+          </div>
+
+          {/* Status badge */}
+          <div style={{ marginBottom: '16px' }}>
+            <div
+              className={getStatusClass(task.status)}
+              style={{
+                padding: '6px 12px',
+                background: 'rgba(0,0,0,0.2)',
+                borderRadius: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <ClockCircleOutlined />
+              <Text style={{ textTransform: 'capitalize' }}>
+                {task.status.replace('_', ' ')}
+              </Text>
+            </div>
+          </div>
+
+          {/* Comment count badge */}
+          {commentCount > 0 && (
+            <div style={{ marginBottom: '12px' }}>
+              <Badge
+                count={commentCount}
+                style={{ backgroundColor: '#4F46E5' }}
+              >
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  fontSize: '13px',
+                }}>
+                  <CommentOutlined />
+                  <span>Comments</span>
+                </div>
+              </Badge>
+            </div>
+          )}
+        </div>
+
+        {/* Actions footer */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          paddingTop: '12px',
+          gap: '8px',
+          marginTop: '16px'
+        }}>
+          <Tooltip title="View Details & Comments">
             <Button
-              type="primary"
-              className="status-completed"
-              icon={<CheckCircleOutlined />}
+              type="text"
+              icon={<InfoCircleOutlined />}
               shape="circle"
-              onClick={() => onStatusUpdate && onStatusUpdate(task.id, 'completed')}
+              onClick={showTaskDetail}
             />
           </Tooltip>
-        )}
 
-        <Tooltip title="Edit">
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            shape="circle"
-            onClick={() => onEdit && onEdit(task)}
-          />
-        </Tooltip>
-
-        {userIsAdmin && (
-          <Popconfirm
-            title="Are you sure you want to delete this task?"
-            onConfirm={() => onDelete && onDelete(task.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Tooltip title="Delete">
+          {task.status !== 'completed' && (
+            <Tooltip title="Mark Complete">
               <Button
                 type="primary"
-                danger
-                icon={<DeleteOutlined />}
+                className="status-completed"
+                icon={<CheckCircleOutlined />}
                 shape="circle"
+                onClick={() => onStatusUpdate && onStatusUpdate(task.id, 'completed')}
               />
             </Tooltip>
-          </Popconfirm>
-        )}
-      </div>
-    </Card>
+          )}
+
+          <Tooltip title="Edit">
+            <Button
+              type="primary"
+              icon={<EditOutlined />}
+              shape="circle"
+              onClick={() => onEdit && onEdit(task)}
+            />
+          </Tooltip>
+
+          {userIsAdmin && (
+            <Popconfirm
+              title="Are you sure you want to delete this task?"
+              onConfirm={() => onDelete && onDelete(task.id)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Tooltip title="Delete">
+                <Button
+                  type="primary"
+                  danger
+                  icon={<DeleteOutlined />}
+                  shape="circle"
+                />
+              </Tooltip>
+            </Popconfirm>
+          )}
+        </div>
+      </Card>
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        taskId={task.id}
+        visible={detailModalVisible}
+        onClose={() => setDetailModalVisible(false)}
+        onTaskUpdated={() => {
+          if (onTaskUpdated) {
+            onTaskUpdated();
+          }
+        }}
+      />
+    </>
   );
 };
 

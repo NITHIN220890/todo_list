@@ -1,4 +1,4 @@
-// TaskListView with Fixed Edit Mode Population
+// Updated TaskListView.jsx with Task Detail Modal integration
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,7 +20,8 @@ import {
   Tooltip,
   Popconfirm,
   Modal,
-  Form
+  Form,
+  Badge
 } from 'antd';
 import {
   PlusOutlined,
@@ -34,10 +35,13 @@ import {
   CalendarOutlined,
   ClockCircleOutlined,
   SaveOutlined,
-  CloseOutlined
+  CloseOutlined,
+  CommentOutlined
 } from '@ant-design/icons';
 import { getTasks, updateTaskStatus, deleteTask, getUsers, isAdmin, updateTask } from '../services/api';
 import moment from 'moment';
+import TaskCard from './TaskCard';
+import TaskDetailModal from './TaskDetailModal';
 
 const { Option } = Select;
 const { RangePicker } = DatePicker;
@@ -56,7 +60,9 @@ const TaskListView = () => {
   });
   const [viewMode, setViewMode] = useState('card'); // 'card' or 'table'
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [form] = Form.useForm();
 
   const navigate = useNavigate();
@@ -194,6 +200,11 @@ const TaskListView = () => {
     setEditModalVisible(true);
   };
 
+  const handleViewTaskDetails = (taskId) => {
+    setSelectedTaskId(taskId);
+    setDetailModalVisible(true);
+  };
+
   const handleEditCancel = () => {
     setEditModalVisible(false);
     setCurrentTask(null);
@@ -244,126 +255,6 @@ const TaskListView = () => {
     return `status-${status.replace('_', '-')}`;
   };
 
-  // Render a single task card
-  const renderTaskCard = (task) => {
-    return (
-      <Card
-        className="task-card"
-        bordered={false}
-      >
-        <div className="card-header">
-          <Text strong style={{ fontSize: '18px', flex: 1 }}>
-            {task.title}
-          </Text>
-          <Tag
-            className={getPriorityClass(task.priority)}
-          >
-            {task.priority}
-          </Tag>
-        </div>
-
-        {task.description && (
-          <Text
-            type="secondary"
-            style={{
-              display: 'block',
-              marginBottom: '16px',
-              fontSize: '14px'
-            }}
-            ellipsis={{ rows: 2 }}
-          >
-            {task.description}
-          </Text>
-        )}
-
-        {/* Assignment info */}
-        <div className="card-meta-item">
-          <Text type="secondary" style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>
-            Assigned to:
-          </Text>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar
-              style={{ marginRight: '8px' }}
-            >
-              {task.assignee?.name?.charAt(0)?.toUpperCase() || 'U'}
-            </Avatar>
-            <Text>{task.assignee?.name || 'Unassigned'}</Text>
-          </div>
-        </div>
-
-        {/* Timeline */}
-        <div className="card-meta-item">
-          <Text type="secondary" style={{ fontSize: '13px', display: 'block', marginBottom: '4px' }}>
-            Timeline:
-          </Text>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <CalendarOutlined style={{ marginRight: '8px', color: '#3B82F6' }} />
-            <Text>{moment(task.start_date).format('MMM D')} - {moment(task.end_date).format('MMM D, YYYY')}</Text>
-          </div>
-        </div>
-
-        {/* Status */}
-        <div style={{ marginBottom: '16px' }}>
-          <div
-            className={getStatusClass(task.status)}
-            style={{
-              padding: '6px 12px',
-              borderRadius: '6px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            <ClockCircleOutlined />
-            <Text style={{ textTransform: 'capitalize' }}>
-              {task.status.replace('_', ' ')}
-            </Text>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="card-footer">
-          {task.status !== 'completed' && (
-            <Tooltip title="Mark Complete">
-              <Button
-                type="primary"
-                className="status-completed"
-                icon={<CheckCircleOutlined />}
-                shape="circle"
-                onClick={() => handleUpdateStatus(task.id, 'completed')}
-              />
-            </Tooltip>
-          )}
-
-          <Tooltip title="Edit">
-            <Button
-              type="primary"
-              icon={<EditOutlined />}
-              shape="circle"
-              onClick={() => handleEditTask(task)}
-            />
-          </Tooltip>
-
-          {userIsAdmin && (
-            <Popconfirm
-              title="Are you sure you want to delete this task?"
-              onConfirm={() => handleDeleteTask(task.id)}
-              okText="Yes"
-              cancelText="No"
-            >
-              <Button
-                type="primary"
-                danger
-                icon={<DeleteOutlined />}
-                shape="circle"
-              />
-            </Popconfirm>
-          )}
-        </div>
-      </Card>
-    );
-  };
-
   // Table columns for list view
   const columns = [
     {
@@ -372,7 +263,16 @@ const TaskListView = () => {
       key: 'title',
       render: (text, record) => (
         <div style={{ maxWidth: '300px' }}>
-          <Text strong style={{ fontSize: '15px', display: 'block' }}>{text}</Text>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Text strong style={{ fontSize: '15px' }}>{text}</Text>
+            {record.comments && record.comments.length > 0 && (
+              <Badge
+                count={record.comments.length}
+                size="small"
+                style={{ backgroundColor: '#4F46E5' }}
+              />
+            )}
+          </div>
           {record.description && (
             <Text type="secondary" ellipsis={{ rows: 1 }} style={{ fontSize: '13px' }}>
               {record.description}
@@ -441,6 +341,15 @@ const TaskListView = () => {
       key: 'actions',
       render: (_, record) => (
         <Space size="small">
+          <Tooltip title="View Details & Comments">
+            <Button
+              type="primary"
+              icon={<InfoCircleOutlined />}
+              size="small"
+              onClick={() => handleViewTaskDetails(record.id)}
+            />
+          </Tooltip>
+
           {record.status !== 'completed' && (
             <Tooltip title="Mark Complete">
               <Button
@@ -609,7 +518,14 @@ const TaskListView = () => {
         <Row gutter={[16, 16]}>
           {tasks.map(task => (
             <Col xs={24} sm={12} md={8} lg={6} key={task.id}>
-              {renderTaskCard(task)}
+              <TaskCard
+                task={task}
+                onStatusUpdate={handleUpdateStatus}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                onTaskUpdated={fetchTasks}
+                userIsAdmin={userIsAdmin}
+              />
             </Col>
           ))}
         </Row>
@@ -728,6 +644,19 @@ const TaskListView = () => {
           </Row>
         </Form>
       </Modal>
+
+      {/* Task Detail Modal */}
+      {selectedTaskId && (
+        <TaskDetailModal
+          taskId={selectedTaskId}
+          visible={detailModalVisible}
+          onClose={() => {
+            setDetailModalVisible(false);
+            setSelectedTaskId(null);
+          }}
+          onTaskUpdated={fetchTasks}
+        />
+      )}
     </div>
   );
 };

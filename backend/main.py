@@ -1,4 +1,4 @@
-# main.py
+# main.py - Added comment API endpoints
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -306,6 +306,80 @@ def delete_task(
     if db_task is None:
         raise HTTPException(status_code=404, detail="Task not found")
     return crud.delete_task(db=db, task_id=task_id)
+
+
+# Comment routes
+@app.get("/api/tasks/{task_id}/comments", response_model=List[schemas.Comment])
+def read_comments(
+        task_id: int,
+        skip: int = 0,
+        limit: int = 100,
+        db: Session = Depends(get_db),
+        current_user: schemas.User = Depends(get_current_user)
+):
+    # First check if task exists and user has access to it
+    db_task = crud.get_task(db, task_id=task_id)
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    # Any user can view comments on tasks they can see
+    return crud.get_comments_by_task(db, task_id=task_id, skip=skip, limit=limit)
+
+
+@app.post("/api/tasks/{task_id}/comments", response_model=schemas.Comment)
+def create_comment(
+        task_id: int,
+        comment: schemas.CommentCreate,
+        db: Session = Depends(get_db),
+        current_user: schemas.User = Depends(get_current_user)
+):
+    # First check if task exists
+    db_task = crud.get_task(db, task_id=task_id)
+    if db_task is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    # Ensure the comment task_id matches the URL task_id
+    if comment.task_id != task_id:
+        raise HTTPException(status_code=400, detail="Task ID mismatch")
+
+    # Any user can comment on tasks they can see
+    return crud.create_comment(db=db, comment=comment, user_id=current_user.id)
+
+
+@app.put("/api/comments/{comment_id}", response_model=schemas.Comment)
+def update_comment(
+        comment_id: int,
+        comment: schemas.CommentUpdate,
+        db: Session = Depends(get_db),
+        current_user: schemas.User = Depends(get_current_user)
+):
+    # Users can only update their own comments
+    db_comment = crud.update_comment(db=db, comment_id=comment_id, comment=comment, user_id=current_user.id)
+
+    if db_comment is None:
+        raise HTTPException(status_code=404, detail="Comment not found or you're not authorized to update it")
+
+    return db_comment
+
+
+@app.delete("/api/comments/{comment_id}", response_model=schemas.Comment)
+def delete_comment(
+        comment_id: int,
+        db: Session = Depends(get_db),
+        current_user: schemas.User = Depends(get_current_user)
+):
+    # Users can delete their own comments, admins can delete any comment
+    db_comment = crud.delete_comment(
+        db=db,
+        comment_id=comment_id,
+        user_id=current_user.id,
+        is_admin=current_user.is_admin
+    )
+
+    if db_comment is None:
+        raise HTTPException(status_code=404, detail="Comment not found or you're not authorized to delete it")
+
+    return db_comment
 
 
 # Add a simple root route

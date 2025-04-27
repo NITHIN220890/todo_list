@@ -1,11 +1,13 @@
-// Fixed TaskCalendarView.jsx
+// Updated TaskCalendarView.jsx with Task Detail Modal integration
 import React, { useState, useEffect } from 'react';
-import { Calendar, Badge, Select, Spin, message, Typography, Tooltip, Empty } from 'antd';
+import { Calendar, Badge, Select, Spin, message, Typography, Tooltip, Empty, Button } from 'antd';
 import { getTasks, getUsers, isAdmin } from '../services/api';
 import moment from 'moment';
+import TaskDetailModal from './TaskDetailModal';
+import { CommentOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const TaskCalendarView = () => {
   const [tasks, setTasks] = useState([]);
@@ -14,6 +16,8 @@ const TaskCalendarView = () => {
   const [filters, setFilters] = useState({
     assignee_id: null
   });
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
   const userIsAdmin = isAdmin();
 
   useEffect(() => {
@@ -84,6 +88,11 @@ const TaskCalendarView = () => {
     });
   };
 
+  const handleViewTaskDetails = (taskId) => {
+    setSelectedTaskId(taskId);
+    setDetailModalVisible(true);
+  };
+
   const dateCellRender = (date) => {
     const tasksForDate = getTasksForDate(date);
 
@@ -92,13 +101,33 @@ const TaskCalendarView = () => {
     return (
       <ul className="events" style={{ listStyleType: 'none', margin: 0, padding: 0 }}>
         {tasksForDate.map(task => (
-          <li key={task.id} style={{ marginBottom: '2px' }}>
-            <Tooltip title={`${task.description || 'No description'} (Assigned to: ${task.assignee.name})`}>
-              <Badge
-                status={getPriorityColor(task.priority)}
-                text={<span style={{ fontSize: '12px' }}>{task.title}</span>}
-              />
-            </Tooltip>
+          <li key={task.id} style={{ marginBottom: '4px' }}>
+            <div
+              onClick={() => handleViewTaskDetails(task.id)}
+              style={{
+                cursor: 'pointer',
+                borderRadius: '4px',
+                padding: '2px 4px',
+                transition: 'all 0.2s',
+                backgroundColor: 'rgba(0, 0, 0, 0.2)'
+              }}
+              className="calendar-task-item"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Badge
+                  status={getPriorityColor(task.priority)}
+                  text={<span style={{ fontSize: '12px' }}>{task.title}</span>}
+                />
+                {task.comments && task.comments.length > 0 && (
+                  <Badge
+                    count={task.comments.length}
+                    size="small"
+                    style={{ backgroundColor: '#4F46E5', marginLeft: '4px' }}
+                    title={`${task.comments.length} comments`}
+                  />
+                )}
+              </div>
+            </div>
           </li>
         ))}
       </ul>
@@ -138,9 +167,15 @@ const TaskCalendarView = () => {
 
       <Spin spinning={loading}>
         {tasks.length > 0 ? (
-          <Calendar
-            dateCellRender={dateCellRender}
-          />
+          <>
+            <div style={{ marginBottom: '16px', fontSize: '14px', color: 'rgba(255, 255, 255, 0.6)' }}>
+              Click on any task to view details and add comments
+            </div>
+            <Calendar
+              dateCellRender={dateCellRender}
+              className="task-calendar"
+            />
+          </>
         ) : (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
             <Empty description={
@@ -151,6 +186,19 @@ const TaskCalendarView = () => {
           </div>
         )}
       </Spin>
+
+      {/* Task Detail Modal */}
+      {selectedTaskId && (
+        <TaskDetailModal
+          taskId={selectedTaskId}
+          visible={detailModalVisible}
+          onClose={() => {
+            setDetailModalVisible(false);
+            setSelectedTaskId(null);
+          }}
+          onTaskUpdated={fetchTasks}
+        />
+      )}
     </div>
   );
 };
